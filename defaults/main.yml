@@ -1,0 +1,45 @@
+---
+
+agent_version: "7.9.0"
+
+agent_user: ingest_user
+agent_group: ingest_group
+
+agent_vm_repo_baseurl: https://artifacts.elastic.co/packages/7.x/yum
+agent_vm_repo_gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+agent_vm_repo_packages: ["elastic-agent"," initscripts"]
+agent_vm_repo_package: "https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-{{ agent_version }}-x86_64.rpm"
+
+agent_server_name: none
+
+agent_data_dir: /usr/share/elastic-agent/data
+agent_config_dir: /etc/elastic-agent
+
+agent_logging_dest: /var/log/elastic-agent
+agent_logging_file: agent.log
+agent_logging_verbose: false
+agent_logging_rotate_enabled: true
+agent_logging_rotate_bytes: 10485760
+agent_logging_rotate_files: 5
+
+agent_force_keystore_create: false
+
+agent_cluster_name: clustermicro
+
+agent_security_enabled: false
+agent_security_ssl_enabled: false
+agent_security_ssl_certificate: elastic-agent.pem
+agent_security_ssl_key: elastic-agent.key
+agent_security_elasticsearch_user: elastic-agent
+agent_security_elasticsearch_pass: 3l4st1sT4ckb00tstr4p
+
+agent_elasticsearch_security_enabled: false
+agent_elasticsearch_cluster_network_addresses: []
+agent_elasticsearch_network_port: 9200
+agent_elasticsearch_ssl_verification_mode: none
+agent_elasticsearch_certificate_ca_file_ingest: ESca.crt
+
+agent_certificate_local_dir: certificates
+agent_certificate_dir: /etc/elastic-agent/certs
+
+agent_monitoring_metricbeat_enabled: false

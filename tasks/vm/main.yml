@@ -1,0 +1,105 @@
+---
+
+- name: Add groups
+  group:
+    name: "{{ item }}"
+  with_items: "{{ agent_group }}"
+
+- name: Add user
+  user:
+    name: "{{ agent_user }}"
+    comment: Agent execution user
+    shell: /bin/false
+    groups: "{{ agent_group }}"
+
+- name: Create agent directories
+  file:
+    state: directory
+    path: "{{ item }}"
+    recurse: False
+    owner: "{{ agent_user }}"
+    group: "{{ agent_group }}"
+  with_items:
+    - "{{ agent_config_dir }}"
+    - "{{ agent_data_dir }}"
+    - "{{ agent_certificate_dir }}"
+    - "{{ agent_logging_dest }}"
+  register: dir_create
+  tags:
+    - configuration
+    - files
+
+- name: Copy SSL certificates
+  copy:
+    src: "{{ agent_certificate_local_dir }}/"
+    dest: "{{ agent_certificate_dir }}/"
+  register: copy_certs
+  when: agent_security_enabled | bool
+  tags:
+    - configuration
+    - files
+    - certificates
+
+- name: Copy agent configuration
+  template:
+    src: elastic-agent.j2
+    dest: "{{ agent_config_dir }}/elastic-agent.yml"
+    owner: "{{ agent_user }}"
+    group: "{{ agent_group }}"
+    backup: True
+  register: agent_config
+  tags:
+    - configuration
+    - files
+
+#- name: Install packages
+#  yum:
+#    name: "https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-{{ agent_version }}-x86_64.rpm"
+#    state: latest
+#    update_cache: True
+
+- name: Add repository
+  yum_repository:
+    name: elastic-agent
+    description: Agent official repository
+    baseurl: "{{ agent_vm_repo_baseurl }}"
+    gpgkey: "{{ agent_vm_repo_gpgkey }}"
+    gpgcheck: True
+
+- name: Install packages
+  yum:
+    name: "{{ agent_vm_repo_packages | map('regex_replace','^elastic-agent$','elastic-agent-' + agent_version + '-1' ) | list }}"
+    state: latest
+    update_cache: True
+
+#- name: Remove agent keystore
+#  file:
+#    path: "{{ agent_config_dir }}/elastic-agent.keystore"
+#    state: absent
+#  when: agent_force_keystore_create | bool
+#  tags:
+#    - configuration
+#    - files
+#    - keystore
+#
+#- name: Add agent keystore keys
+#  command: "/usr/share/kibana/bin/elastic-agent add --force --stdin item.value"
+#  args:
+#    stdin: "{{ item.key }}"
+#  #become_user: "{{ kibana_user }}"
+#  when: kibana_security_enabled | bool
+#  with_dict:
+#    elasticsearch.username: "{{ kibana_security_elasticsearch_user }}"
+#    elasticsearch.password: "{{ kibana_security_elasticsearch_pass }}"
+#  register: keystore_write
+#  tags:
+#    - configuration
+#    - files
+#    - keystore
+
+- name: Start and enable service
+  service:
+    name: elastic-agent
+    #state: "{% if agent_config.changed or keystore_write.changed %}restarted{% else %}started{% endif %}"
+    state: "{% if agent_config.changed %}restarted{% else %}started{% endif %}"
+    enabled: True

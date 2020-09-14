@@ -1,0 +1,32 @@
+---
+
+dependency:
+  name: galaxy
+
+driver:
+  name: vagrant
+  provider:
+    name: VBox
+
+platforms:
+  - name: instance-${MOLECULE_ROLE_NAME:-molecule}-1
+    groups:
+      - agent
+      - elasticsearch
+    box: centos/7
+    memory: 512
+    cpus: 1
+
+provisioner:
+  name: ansible
+  log: true
+  options:
+    become: true
+  group_vars:
+    agent:
+      agent_security_enabled: False
+    elasticsearch:
+      elasticsearch_security_enabled: False
+
+verifier:
+  name: ansible
