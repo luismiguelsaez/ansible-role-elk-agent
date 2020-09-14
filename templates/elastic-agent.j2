@@ -1,0 +1,38 @@
+inputs:
+  - type: system/metrics
+    data_stream.namespace: default
+    use_output: default
+    streams:
+      - metricset: cpu
+        data_stream.dataset: system.cpu
+      - metricset: memory
+        data_stream.dataset: system.memory
+      - metricset: network
+        data_stream.dataset: system.network
+      - metricset: filesystem
+        data_stream.dataset: system.filesystem
+
+{% if agent_monitoring_enabled %}
+agent.monitoring:
+  enabled: true
+  logs: true
+  metrics: true
+  use_output: monitoring
+{% endif %}
+
+outputs:
+{% if agent_output_default_type == "elasticsearch" %}
+  default:
+    type: elasticsearch
+{% if agent_elasticsearch_cluster_network_addresses|length < 1 %}
+    hosts: ["{% if agent_elasticsearch_security_enabled %}https{% else %}http{% endif %}://{{ ansible_default_ipv4.address }}:{{ agent_elasticsearch_network_port }}"]
+{% else %}
+    hosts:[ {% for node in agent_elasticsearch_cluster_network_addresses %}"{% if agent_elasticsearch_security_enabled %}https{% else %}http{% endif %}://{{ node }}:{{ kibana_elasticsearch_network_port }}"{% if loop.index != kibana_elasticsearch_cluster_network_addresses|length %},{% endif %}{% endfor %} ]
+{% endif %}
+{% if agent_elasticsearch_security_enabled %}
+    username: {{ agent_output_default_username }}
+    password: {{ agent_output_default_password }}
+    ssl.verificationMode: {{ agent_elasticsearch_ssl_verification_mode }}
+    ssl.certificateAuthorities {{ agent_certificate_dir }}/{{ agent_elasticsearch_certificate_ca_file_ingest }}
+{% endif %}
+{% endif %}

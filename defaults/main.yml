@@ -10,7 +10,12 @@ agent_vm_repo_gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
 agent_vm_repo_packages: ["elastic-agent"," initscripts"]
 agent_vm_repo_package: "https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-{{ agent_version }}-x86_64.rpm"
 
-agent_server_name: none
+agent_monitoring_enabled: true
+agent_monitoring_use_output: default
+
+agent_output_default_type: elasticsearch
+agent_output_default_username: elastic
+agent_output_default_password: changeme
 
 agent_data_dir: /usr/share/elastic-agent/data
 agent_config_dir: /etc/elastic-agent
