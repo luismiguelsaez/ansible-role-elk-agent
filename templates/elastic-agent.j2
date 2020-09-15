@@ -27,7 +27,7 @@ outputs:
 {% if agent_elasticsearch_cluster_network_addresses|length < 1 %}
     hosts: ["{% if agent_elasticsearch_security_enabled %}https{% else %}http{% endif %}://{{ ansible_default_ipv4.address }}:{{ agent_elasticsearch_network_port }}"]
 {% else %}
-    hosts:[ {% for node in agent_elasticsearch_cluster_network_addresses %}"{% if agent_elasticsearch_security_enabled %}https{% else %}http{% endif %}://{{ node }}:{{ kibana_elasticsearch_network_port }}"{% if loop.index != kibana_elasticsearch_cluster_network_addresses|length %},{% endif %}{% endfor %} ]
+    hosts:[ {% for node in agent_elasticsearch_cluster_network_addresses %}"{% if agent_elasticsearch_security_enabled %}https{% else %}http{% endif %}://{{ node }}:{{ agent_elasticsearch_network_port }}"{% if loop.index != agent_elasticsearch_cluster_network_addresses|length %},{% endif %}{% endfor %} ]
 {% endif %}
 {% if agent_elasticsearch_security_enabled %}
     username: {{ agent_output_default_username }}
